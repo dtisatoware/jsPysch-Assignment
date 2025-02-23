@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Lexical Desition Task Experiment - Dhara Zoe Tisato Ware</h1>
+    <script src="https://unpkg.com/jspsych@8.2.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+    <link href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+  <body></body>
+  <script>
+
+      /* initialize jsPsych */
+      var jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+
+    /* create timeline */
+    var timeline = [];
+
+   /* preload images */
+   var preload = {
+      type: jsPsychPreload,
+      images: []
+    };
+    timeline.push(preload);
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
+
+   /* define instructions trial */
+   var instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p>In this experiment you will be shwon a string of letters on the screen.</p>
+          <p>If the string is a real word, press the <strong>F</strong> key.</p>
+          <p>If the string is not a real word (a non-word), press the <strong>J</strong> key.</p>
+          <p>Press any key to begin the experiment.</p>
+      `,
+      post_trial_gap: 2000
+    };
+    timeline.push(instructions);
+
+        /* define trial stimuli array */
+        var test_stimuli = [
+        { stimulus: "banana", correct_response: 'f' }, // real word
+        { stimulus: "abnnab", correct_response: 'j' }, // non-word
+        { stimulus: "today", correct_response: 'f' }, // real word
+        { stimulus: "ndaye", correct_response: 'j' }, // non-word
+        { stimulus: "time", correct_response: 'f' }, // real word
+        { stimulus: "ddudlo", correct_response: 'j' }, // non-word
+        { stimulus: "cuddle", correct_response: 'f' }, // real word
+        { stimulus: "tormeb", correct_response: 'j' }, // non-word
+        { stimulus: "extravagant", correct_response: 'f' }, // real word
+        { stimulus: "sudair", correct_response: 'j' }, // non-word
+        { stimulus: "supremacy", correct_response: 'f' }, // real word
+        { stimulus: "asfron", correct_response: 'j' }, // non-word
+        { stimulus: "wait", correct_response: 'f' }, // real word
+        { stimulus: "froin", correct_response: 'j' }, // non-word
+        { stimulus: "hot", correct_response: 'f' }, // real word
+        { stimulus: "crod", correct_response: 'j' }, // non-word
+        { stimulus: "honey", correct_response: 'f' }, // real word
+        { stimulus: "smlat", correct_response: 'j' }, // non-word
+        { stimulus: "nuke", correct_response: 'f' }, // real word
+        { stimulus: "hhuor", correct_response: 'j' }, // non-word
+        { stimulus: "smoke", correct_response: 'f' }, // real word
+        { stimulus: "skgih", correct_response: 'j' }, // non-word
+        { stimulus: "climb", correct_response: 'f' }, // real word
+        { stimulus: "heris", correct_response: 'j' } // non-word 
+      ];
+
+    /* define fixation and test trials */
+    var fixation = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: "NO_KEYS",
+      trial_duration: function(){
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: {
+        task: 'fixation'
+      }
+    };
+
+    var test = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('stimulus'),
+      choices: ['f', 'j'],
+      data: {
+        task: 'response',
+        correct_response: jsPsych.timelineVariable('correct_response')
+      },
+      on_finish: function(data){
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      }
+    };
+
+    /* define test procedure */
+    var test_procedure = {
+      timeline: [fixation, test],
+      timeline_variables: test_stimuli,
+      randomize_order: true,
+      repetitions: 2
+    };
+    timeline.push(test_procedure);
+
+        /* define debrief */
+        var debrief_block = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+        var rt = Math.round(correct_trials.select('rt').mean());
+
+        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
+          <p>Your average response time was ${rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>`;
+
+      }
+    };
+    timeline.push(debrief_block);
+
+
+    /* start the experiment */
+    jsPsych.run(timeline);
+
+  </script>
+</html>
